@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAEC Questions - FINAL All Subjects</title>
+<style>
+*{box-sizing:border-box}
+body{font-family:Arial;background:#0f172a;color:white;margin:0;padding:10px;font-size:19px}
+.card{background:white;color:#111;padding:24px;border-radius:16px;max-width:700px;margin:16px auto;text-align:left;font-size:19px;line-height:1.6}
+h2{font-size:26px;margin:5px 0}
+button{background:#2563eb;color:white;border:none;padding:15px;margin:6px 0;border-radius:10px;font-size:19px;width:100%;cursor:pointer}
+button.green{background:#22c55e}
+button.red{background:#ef4444}
+button.grey{background:#64748b}
+button.small{width:auto;padding:10px 14px;font-size:16px}
+input{width:100%;padding:15px;margin:8px 0;border-radius:10px;border:1px solid #ccc;font-size:19px}
+.hidden{display:none}
+.subject-btn{background:#f1f5f9;color:black;text-align:left}
+.profile-img{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #2563eb;display:block;margin:10px auto}
+.error{color:red;font-size:16px}
+.success{color:green;font-size:16px}
+.hist{background:#f8fafc;border:1px solid #e2e8f0;padding:12px;border-radius:10px;margin:8px 0;font-size:17px}
+</style>
+</head>
+<body>
+<div id="loginPage" class="card">
+<h2>Welcome to WAEC Questions - FINAL</h2><p>Create Account to Continue - Login Once For All Subjects</p>
+<div id="registerBox">
+<input id="regName" placeholder="Enter Your Full Name">
+<input id="regEmail" type="email" placeholder="Enter Your Email e.g. you@gmail.com">
+<input id="regPassword" type="password" placeholder="Create Password - Letters + Numbers, min 6 e.g. John123">
+<p class="error" id="passError"></p>
+<label>Profile Picture (Optional)</label>
+<input id="profilePic" type="file" accept="image/*">
+<img id="previewPic" class="profile-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+<button class="green" onclick="sendCode()">Create Account - Send Verification Code</button>
+</div>
+<div id="verifyBox" class="hidden">
+<p>Code sent to <b id="showEmail"></b></p>
+<p>For testing now, your code is: <b style="color:green;font-size:24px">123456</b></p>
+<input id="codeInput" placeholder="Enter 6-digit code">
+<button class="green" onclick="verifyCode()">Verify & Create Account</button>
+<button onclick="backToRegister()">Back</button>
+</div>
+<hr><p style="text-align:center"><b>Already have account? Login here</b></p>
+<input id="loginEmail" placeholder="Enter Your Email for Login">
+<input id="loginPassword" type="password" placeholder="Enter Your Password">
+<button onclick="login()">Login</button>
+<p class="error" id="loginError"></p>
+</div>
+
+<div id="menuPage" class="card hidden">
+<img id="userPic" class="profile-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+<h2 style="text-align:center">Hello, <span id="userName"></span></h2>
+<p style="text-align:center" id="userEmailShow"></p>
+<p><b>Choose a Subject Group - Tap to Open:</b></p>
+<button class="subject-btn" onclick="openPage('index.html')">📘 General Maths + English - index.html</button>
+<button class="subject-btn" onclick="openPage('page3.html')">📗 Further Maths + Physics - page3.html</button>
+<button class="subject-btn" onclick="openPage('page4.html')">📙 Chemistry + Biology - page4.html</button>
+<button class="subject-btn" onclick="openPage('page5.html')">📕 Economics + Government - page5.html</button>
+<button class="subject-btn" onclick="openPage('page6.html')">📓 Literature + CRS / IRS - page6.html</button>
+<button class="subject-btn" onclick="openPage('page7.html')">🌍 Geography + History - page7.html</button>
+<button class="subject-btn" onclick="openPage('page8.html')">💰 Commerce + Accounting - page8.html</button>
+<button class="subject-btn" onclick="openPage('page9.html')">🌾 Agric Science + Food & Nutrition - page9.html</button>
+<button class="subject-btn" onclick="openPage('page10.html')">💻 Computer Studies + Technical Drawing - page10.html</button>
+<button class="grey" onclick="openSettings()">⚙️ Settings - Profile, Password, Email, History, Close Account</button>
+<h3>My Past Scores / History (All Subjects)</h3>
+<div id="historyArea"><p>No exam yet.</p></div>
+<button class="red small" onclick="clearHistory()">Clear History</button>
+</div>
+
+<div id="settingsPage" class="card hidden">
+<h2>⚙️ Settings</h2>
+<img id="settingsPic" class="profile-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png">
+<p><b>Name:</b> <span id="setName"></span></p>
+<p><b>Email:</b> <span id="setEmail"></span></p>
+<hr><h3>Change Profile Picture</h3>
+<input id="newPic" type="file" accept="image/*">
+<button class="green" onclick="changePic()">Update Picture</button>
+<hr><h3>Change Password</h3>
+<input id="oldPass" type="password" placeholder="Enter Old Password">
+<input id="newPass" type="password" placeholder="New Password - Letters + Numbers, min 6">
+<p class="error" id="passChangeError"></p><p class="success" id="passChangeOk"></p>
+<button onclick="changePassword()">Change Password</button>
+<hr><h3>Change Email</h3>
+<input id="newEmail" type="email" placeholder="Enter New Email">
+<button onclick="changeEmail()">Change Email</button>
+<p class="success" id="emailChangeOk"></p>
+<hr><h3>My Past Scores</h3><div id="settingsHistory"></div><hr>
+<button class="grey" onclick="logout()">Logout</button>
+<button class="red" onclick="closeAccount()">Close / Delete My Account</button>
+<button onclick="backToMenuFromSettings()">Back to Menu</button>
+</div>
+
+<script>
+let generatedCode="123456";let tempUser={};let currentUser=null;
+function isValidPassword(p){return p.length>=6 && /[a-zA-Z]/.test(p) && /[0-9]/.test(p);}
+function sendCode(){let n=document.getElementById("regName").value.trim();let e=document.getElementById("regEmail").value.trim();let p=document.getElementById("regPassword").value;if(!n){alert("Enter your name");return;}if(!e||!e.includes("@")){alert("Enter a valid email");return;}if(!isValidPassword(p)){document.getElementById("passError").innerText="Password must have letters + numbers and be at least 6 characters. Example: John123";return;}document.getElementById("passError").innerText="";let file=document.getElementById("profilePic").files[0];let pic="https://cdn-icons-png.flaticon.com/512/149/149071.png";if(file){pic=URL.createObjectURL(file);}tempUser={name:n,email:e,pass:p,pic:pic};document.getElementById("showEmail").innerText=e;document.getElementById("registerBox").classList.add("hidden");document.getElementById("verifyBox").classList.remove("hidden");}
+function backToRegister(){document.getElementById("verifyBox").classList.add("hidden");document.getElementById("registerBox").classList.remove("hidden");}
+function verifyCode(){let c=document.getElementById("codeInput").value.trim();if(c!==generatedCode){alert("Wrong code. For testing use 123456");return;}localStorage.setItem("waec_user_"+tempUser.email,JSON.stringify(tempUser));localStorage.setItem("waec_last_user",tempUser.email);currentUser=tempUser;afterLogin();}
+function afterLogin(){document.getElementById("userName").innerText=currentUser.name;document.getElementById("userEmailShow").innerText=currentUser.email;document.getElementById("userPic").src=currentUser.pic;document.getElementById("loginPage").classList.add("hidden");document.getElementById("menuPage").classList.remove("hidden");document.getElementById("settingsPage").classList.add("hidden");showHistory();}
+function login(){let e=document.getElementById("loginEmail").value.trim();let p=document.getElementById("loginPassword").value;if(!e||!p){document.getElementById("loginError").innerText="Enter email and password.";return;}let data=localStorage.getItem("waec_user_"+e);if(!data){document.getElementById("loginError").innerText="No account found. Please Create Account first.";return;}let u=JSON.parse(data);if(u.pass!==p){document.getElementById("loginError").innerText="Wrong password.";return;}currentUser=u;localStorage.setItem("waec_last_user",e);afterLogin();}
+function logout(){currentUser=null;localStorage.removeItem("waec_last_user");document.getElementById("menuPage").classList.add("hidden");document.getElementById("settingsPage").classList.add("hidden");document.getElementById("loginPage").classList.remove("hidden");}
+function openSettings(){document.getElementById("menuPage").classList.add("hidden");document.getElementById("settingsPage").classList.remove("hidden");document.getElementById("setName").innerText=currentUser.name;document.getElementById("setEmail").innerText=currentUser.email;document.getElementById("settingsPic").src=currentUser.pic;let h=JSON.parse(localStorage.getItem("history_"+currentUser.email)||"[]");document.getElementById("settingsHistory").innerHTML=h.length?h.map(x=>`<div class="hist"><b>${x.subject} - ${x.type}</b> - ${x.correct}/${x.total} = ${x.pct}% - ${x.date}</div>`).reverse().join(""):"<p>No scores yet.</p>";}
+function backToMenuFromSettings(){document.getElementById("settingsPage").classList.add("hidden");document.getElementById("menuPage").classList.remove("hidden");showHistory();}
+function changePic(){let f=document.getElementById("newPic").files[0];if(!f){alert("Choose a picture first");return;}let url=URL.createObjectURL(f);currentUser.pic=url;localStorage.setItem("waec_user_"+currentUser.email,JSON.stringify(currentUser));document.getElementById("settingsPic").src=url;document.getElementById("userPic").src=url;alert("Profile picture updated!");}
+function changePassword(){let oldP=document.getElementById("oldPass").value;let newP=document.getElementById("newPass").value;if(oldP!==currentUser.pass){document.getElementById("passChangeError").innerText="Old password is wrong.";return;}if(!isValidPassword(newP)){document.getElementById("passChangeError").innerText="New password must have letters + numbers, min 6.";return;}currentUser.pass=newP;localStorage.setItem("waec_user_"+currentUser.email,JSON.stringify(currentUser));document.getElementById("passChangeOk").innerText="Password changed successfully!";alert("Password changed!");}
+function changeEmail(){let ne=document.getElementById("newEmail").value.trim();if(!ne||!ne.includes("@")){alert("Enter valid new email");return;}let oldEmail=currentUser.email;let hist=localStorage.getItem("history_"+oldEmail);localStorage.removeItem("waec_user_"+oldEmail);if(hist){localStorage.setItem("history_"+ne,hist);}currentUser.email=ne;localStorage.setItem("waec_user_"+ne,JSON.stringify(currentUser));localStorage.setItem("waec_last_user",ne);document.getElementById("setEmail").innerText=ne;document.getElementById("userEmailShow").innerText=ne;document.getElementById("emailChangeOk").innerText="Email changed to "+ne;alert("Email changed!");}
+function closeAccount(){if(!confirm("Are you sure you want to CLOSE / DELETE your account?"))return;localStorage.removeItem("waec_user_"+currentUser.email);localStorage.removeItem("history_"+currentUser.email);localStorage.removeItem("waec_last_user");currentUser=null;document.getElementById("settingsPage").classList.add("hidden");document.getElementById("loginPage").classList.remove("hidden");alert("Account closed.");}
+function showHistory(){if(!currentUser)return;let h=JSON.parse(localStorage.getItem("history_"+currentUser.email)||"[]");let a=document.getElementById("historyArea");a.innerHTML=h.length?h.map(x=>`<div class="hist"><b>${x.subject} - ${x.type}</b><br>Score: ${x.correct}/${x.total} = ${x.pct}%<br><small>${x.date}</small></div>`).reverse().join(""):"<p>No exam yet. Your scores will show here.</p>";}
+function clearHistory(){if(!currentUser)return;localStorage.removeItem("history_"+currentUser.email);showHistory();}
+function openPage(page){localStorage.setItem("waec_last_user",currentUser.email);window.location.href=page+"?from=final";}
+document.getElementById("profilePic").addEventListener("change",function(e){let f=e.target.files[0];if(f){document.getElementById("previewPic").src=URL.createObjectURL(f);}});
+// Auto-login if already created account before
+let last=localStorage.getItem("waec_last_user");
+if(last){let d=localStorage.getItem("waec_user_"+last);if(d){currentUser=JSON.parse(d);afterLogin();}}
+</script>
+</body>
+</html>
